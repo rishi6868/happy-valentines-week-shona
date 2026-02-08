@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>7 Days of Love ❤️</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#ff758c,#ff7eb3);
+  color:white;
+  text-align:center;
+  overflow-x:hidden;
+}
+
+h1{margin:25px;font-size:2.3rem;}
+
+.typing{
+  border-right:3px solid #fff;
+  padding-right:5px;
+  animation:blink .8s infinite;
+}
+@keyframes blink{50%{border-color:transparent}}
+
+.days{
+  display:flex;
+  gap:18px;
+  padding:20px;
+  overflow-x:auto;
+}
+
+.day{
+  min-width:180px;
+  padding:18px;
+  border-radius:18px;
+  background:rgba(255,255,255,.2);
+  cursor:pointer;
+}
+.locked{opacity:.5}
+
+.popup{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+
+.popup-content{
+  background:white;
+  color:#333;
+  padding:25px;
+  border-radius:20px;
+  width:90%;
+  max-width:420px;
+  animation:pop .4s ease;
+  position:relative;
+}
+@keyframes pop{from{scale:.6;opacity:0}to{scale:1;opacity:1}}
+
+.popup-content img{
+  width:100%;
+  border-radius:15px;
+  margin-bottom:12px;
+}
+
+.close{
+  margin-top:12px;
+  padding:10px 25px;
+  border:none;
+  border-radius:20px;
+  background:#ff4f7b;
+  color:white;
+  cursor:pointer;
+}
+
+.quote{font-style:italic;color:#555}
+
+footer{margin:30px;font-size:1.1rem}
+
+/* Hearts */
+.heart{
+  position:fixed;
+  bottom:-10px;
+  font-size:22px;
+  animation:float 6s linear infinite;
+}
+@keyframes float{
+  from{transform:translateY(0);opacity:1}
+  to{transform:translateY(-110vh);opacity:0}
+}
+
+/* Ring */
+#ring{font-size:60px;display:none;animation:drop 1s ease}
+@keyframes drop{from{transform:translateY(-200px)}to{transform:translateY(0)}}
+
+/* Confetti */
+.confetti{
+  position:fixed;
+  font-size:20px;
+  animation:fall 3s linear forwards;
+}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+
+<body>
+
+<h1>💖 7 Days of Love for <span class="typing" id="typing"></span></h1>
+<div class="days" id="days"></div>
+
+<!-- NORMAL POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h2 id="popupTitle"></h2>
+    <img id="popupImg">
+    <p id="popupText"></p>
+    <p class="quote" id="popupQuote"></p>
+    <button class="close" onclick="closePopup()">Close ❤️</button>
+  </div>
+</div>
+
+<!-- DAY 7 -->
+<div class="popup" id="valentine">
+  <div class="popup-content" id="capture">
+    <h2>💖 Shona 💖</h2>
+    <p id="question" style="font-size:1.4rem">Will you be my Valentine? 🌹</p>
+    <p class="quote" id="sure" style="display:none">Are you sure? 🥺💔</p>
+
+    <div style="height:120px;position:relative">
+      <button class="close" onclick="yes()">YES ❤️</button>
+      <button class="close" id="noBtn" onclick="shuffleNo()" style="position:absolute">NO 🙈</button>
+    </div>
+
+    <div id="ring">💍</div>
+    <p class="quote" id="final" style="display:none">
+      💖 I knew you’d choose the right person 💖<br><br>
+      Shona ❤️ Rishi — Forever
+    </p>
+
+    <button class="close" id="shot" onclick="shot()" style="display:none">📸 Save this moment</button>
+  </div>
+</div>
+
+<footer>Forever Yours, <b>Rishi</b> ❤️</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+const HER_NAME="Shona";
+const START_DATE="2026-02-07";
+
+const dayNames=[
+"🌹 Rose Day","💍 Propose Day","🍫 Chocolate Day",
+"🧸 Teddy Day","🤝 Promise Day","🤗 Hug Day","❤️ Valentine’s Day"
+];
+
+const data={
+1:{t:"A rose for the most beautiful soul ❤️",q:"Love begins with a smile.",i:"images/Day1.jpg"},
+2:{t:"My heart chose you forever 💍",q:"Love is a promise.",i:"images/Day2.jpg"},
+3:{t:"Sweet like chocolate 🍫",q:"Love tastes better with you.",i:"images/Day3.jpg"},
+4:{t:"You’re my comfort 🧸",q:"Love is warmth.",i:"images/Day4.jpg"},
+5:{t:"I promise you forever 🤝",q:"Promises made with heart.",i:"images/Day5.jpg"},
+6:{t:"Sending you a warm hug 🤗",q:"Love needs closeness.",i:"images/Day6.jpg"}
+};
+
+/* DOM refs */
+const typing=document.getElementById("typing");
+const popup=document.getElementById("popup");
+const popupTitle=document.getElementById("popupTitle");
+const popupImg=document.getElementById("popupImg");
+const popupText=document.getElementById("popupText");
+const popupQuote=document.getElementById("popupQuote");
+
+const noBtn=document.getElementById("noBtn");
+const sure=document.getElementById("sure");
+const question=document.getElementById("question");
+const ring=document.getElementById("ring");
+const final=document.getElementById("final");
+const shotBtn=document.getElementById("shot");
+const capture=document.getElementById("capture");
+
+/* typing */
+let i=0;
+(function type(){if(i<HER_NAME.length){typing.innerHTML+=HER_NAME[i++];setTimeout(type,150)}})();
+
+/* unlock logic */
+const today=new Date();
+const start=new Date(START_DATE);
+const unlocked=Math.floor((today-start)/(1000*60*60*24))+2;
+
+const days=document.getElementById("days");
+for(let d=1;d<=7;d++){
+  const box=document.createElement("div");
+  box.className="day"+(d>unlocked?" locked":"");
+  box.innerHTML=`<b>Day ${d}</b><br>${dayNames[d-1]}`;
+  box.onclick=()=>openDay(d);
+  days.appendChild(box);
+}
+
+function openDay(d){
+  if(d>unlocked){
+    popup.style.display="flex";
+    popupTitle.innerText=dayNames[d-1];
+    popupText.innerText="🔒 This day will unlock tomorrow ❤️";
+    popupImg.style.display="none";
+    popupQuote.innerText="";
+    return;
+  }
+  if(d===7){
+    document.getElementById("valentine").style.display="flex";
+    return;
+  }
+  popup.style.display="flex";
+  popupTitle.innerText=dayNames[d-1];
+  popupImg.style.display="block";
+  popupImg.src=data[d].i;
+  popupText.innerText=data[d].t;
+  popupQuote.innerText=`"${data[d].q}"`;
+}
+
+function closePopup(){ popup.style.display="none"; }
+
+function shuffleNo(){
+  sure.style.display="block";
+  noBtn.style.left=Math.random()*200+"px";
+  noBtn.style.top=Math.random()*80+"px";
+}
+
+function yes(){
+  noBtn.style.display="none";
+  sure.style.display="none";
+  question.innerText="She said YES ❤️";
+  ring.style.display="block";
+  final.style.display="block";
+  shotBtn.style.display="inline-block";
+  confetti();
+}
+
+function confetti(){
+  for(let i=0;i<30;i++){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.innerText="💖";
+    c.style.left=Math.random()*100+"vw";
+    c.style.top="-20px";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
+  }
+}
+
+function shot(){
+  html2canvas(capture).then(c=>{
+    const a=document.createElement("a");
+    a.href=c.toDataURL();
+    a.download="Shona_Rishi_Valentine.png";
+    a.click();
+  });
+}
+
+setInterval(()=>{
+  const h=document.createElement("div");
+  h.className="heart";
+  h.innerText="💖";
+  h.style.left=Math.random()*100+"vw";
+  h.style.animationDuration=(Math.random()*3+3)+"s";
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(),6000);
+},500);
+</script>
+
+</body>
+</html>
